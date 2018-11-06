@@ -1,0 +1,6 @@
+[submodule "src/lets_doom_this"]
+	path = src/lets_doom_this
+	url = https://github.com/Mathieu-Seurin/lets_doom_this.git
+[submodule "src/neural_toolbox"]
+	path = src/neural_toolbox
+	url = https://github.com/Mathieu-Seurin/neural_toolbox.git
