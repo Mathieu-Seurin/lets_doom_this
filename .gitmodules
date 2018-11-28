@@ -4,3 +4,6 @@
 [submodule "src/neural_toolbox"]
 	path = src/neural_toolbox
 	url = https://github.com/Mathieu-Seurin/neural_toolbox.git
+[submodule "src/gym-vizdoom"]
+	path = src/gym-vizdoom
+	url = https://github.com/Mathieu-Seurin/gym-vizdoom.git
