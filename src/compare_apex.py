@@ -2,7 +2,7 @@ from ray.rllib.agents import ppo, dqn
 import argparse
 import ray
 
-from config import load_config_and_ext, create_expe_spec, select_agent
+from config import load_config, create_expe_spec, select_agent
 
 from env.doom_tool import vizdoom_basic_creator
 from ray.tune import register_env

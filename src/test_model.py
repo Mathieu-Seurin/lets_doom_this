@@ -2,7 +2,7 @@ from ray.rllib.agents import ppo, dqn
 import argparse
 import ray
 
-from config import load_config_and_ext, create_expe_spec, select_agent
+from config import load_config, create_expe_spec, select_agent
 
 from env.doom_tool import vizdoom_basic_creator
 from ray.tune import register_env
@@ -10,7 +10,7 @@ from ray.tune import register_env
 from ray.tune.logger import pretty_print
 from ray.tune import function as call_back_function
 from env.callback import on_episode_end
-
+from neural_toolbox import policy_model
 
 parser = argparse.ArgumentParser('Log Parser arguments!')
 
@@ -28,13 +28,11 @@ args = parser.parse_args()
 ray.init()
 
 
-full_config = load_config_and_ext(env_config_file=args.env_config,
-                                  model_config_file=args.model_config,
-                                  seed=args.seed,
-
-                                  env_ext_file=args.env_ext,
-                                  model_ext_file=args.model_ext
-                                  )
+full_config = load_config(env_config_file=args.env_config,
+                          model_config_file=args.model_config,
+                          env_ext_file=args.env_ext,
+                          model_ext_file=args.model_ext
+                          )
 
 
 register_env(full_config["env_config"]["env"], lambda env_config: vizdoom_basic_creator(env_config))

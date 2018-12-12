@@ -1,0 +1,22 @@
+{
+  "time_attr": "time_total_s",
+  "reward_attr" : "episode_reward_mean",
+  "perturbation_interval" : 120,
+  "resample_probability" : 0.25,
+
+  "hyperparam_mutations" : {
+    "target_network_update_freq":{"choice" : false,  "range" : [100, 20000]},
+    "timesteps_per_iteration" :  {"choice" : false,  "range" : [500, 2500]},
+    "lr":                        {"choice" : true, "range" : [1e-3, 5e-4, 1e-4, 5e-5, 1e-5]},
+    "sgd_minibatch_size":        {"choice" : false, "range" : [128, 16384]},
+    "train_batch_size":          {"choice" : false, "range" : [32, 1024]},
+    "n_step":                    {"choice" : true, "range" : [1,2,3,4,5]}
+  },
+
+  "init_override":
+  {
+    "train_batch_size" : [32, 128, 512],
+    "target_network_update_freq" : [300,1000,5000]
+  }
+
+}

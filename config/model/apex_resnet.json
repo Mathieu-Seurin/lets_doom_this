@@ -1,0 +1,54 @@
+{
+  "algo":"APEX",
+
+  "algo_config":
+  {
+    "num_envs_per_worker" : 1,
+    "num_workers" : 12,
+    "num_gpus": 1,
+
+    "gamma" : 0.95,
+    "lr" : 1e-4,
+    "n_step": 3,
+
+    "collect_metrics_timeout" : 10,
+
+    "learning_starts": 1000,
+    "train_batch_size": 1024,
+    "target_network_update_freq": 1000,
+    "timesteps_per_iteration": 300,
+
+    "model": {
+      "custom_model" : "resnet_concat",
+      "custom_preprocessor": null,
+      "custom_options" : {
+
+        "n_resblock": 0,
+        "resblock_config": {
+          "conv_channel": 16
+        },
+
+        "stem_config":{
+          "n_layer": 2,
+          "kernel_size": [[6,6],[3,3]],
+          "stride": [2, 3],
+          "channel" : [8, 16]
+        },
+
+        "text_objective_config":{
+          "lstm_hidden_size" : 200,
+          "use_layer_norm" : true,
+          "embedding_size" : 0,
+          "vocab_size" : 19
+
+        },
+
+        "fusing" : {
+          "method": "hadamard"
+        },
+
+        "last_layer_hidden" : 256
+      }
+    }
+  }
+}

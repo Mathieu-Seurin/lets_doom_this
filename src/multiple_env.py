@@ -4,7 +4,7 @@ import argparse
 
 from os import path
 
-from config import load_config_and_ext
+from config import load_config
 
 import gym
 import gym.wrappers

@@ -19,9 +19,24 @@
     "timesteps_per_iteration": 1000,
 
     "model": {
-      "custom_model" : "base_cnn",
+      "custom_model" : "cnn_concat",
       "custom_preprocessor": null,
       "custom_options" : {
+
+        "text_objective_config":{
+          "lstm_hidden_size" : 200,
+          "use_layer_norm" : true,
+          "embedding_size" : 0,
+          "vocab_size" : 19
+
+        },
+
+        "fusing" : {
+          "method": "hadamard"
+        },
+
+        "last_layer_hidden" : 256
+
       }
     }
   }
