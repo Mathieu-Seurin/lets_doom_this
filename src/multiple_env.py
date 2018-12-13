@@ -41,10 +41,10 @@ def test_episodes(episodes):
     return "lol"
 
 
-num_worker = 100
+num_worker = 10000
 
-ray.init()
-results = ray.get([test_episodes.remote(100) for i in range(num_worker)])
+ray.init(num_cpus=40)
+results = ray.get([test_episodes.remote(10) for i in range(num_worker)])
 
-print(results)
+#print(results)
 print(len(results))

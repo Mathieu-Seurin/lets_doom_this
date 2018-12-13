@@ -1,4 +1,9 @@
+import warnings
+warnings.filterwarnings("ignore")
+warnings.simplefilter("ignore")
+
 import argparse
+
 import ray
 
 from config import load_config, create_expe_spec, set_seed, prepare_pbt_config
@@ -21,7 +26,7 @@ args = parser.parse_args()
 
 
 set_seed(args.seed)
-ray.init(object_id_seed=args.seed)
+ray.init(object_id_seed=args.seed, num_gpus=args.n_gpu, num_cpus=args.n_cpu)
 
 
 full_config = load_config(env_config_file=args.env_config,
@@ -39,5 +44,7 @@ experiment = create_expe_spec(full_config,
                               n_gpu=args.n_gpu,
                               exp_dir=args.exp_dir)
 
+
 ray.tune.run_experiments(experiments=experiment,
-                         scheduler=pbt_scheduler)
+                         scheduler=pbt_scheduler,
+                         queue_trials=True)

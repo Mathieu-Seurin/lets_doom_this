@@ -32,8 +32,11 @@ def merge_env_algo_config(config):
         # if embedding size == 0, use one-hot vector for env
         if expe_config["model"]["custom_options"]["text_objective_config"]["embedding_size"] == 0:
             expe_config["env_config"]["onehot"] = True
-            # todo : super ugly.
+            # todo : super ugly. Should be in model or processor
             # But cannot use preprocessor because of multiple intputs
+        else:
+            expe_config["env_config"]["onehot"] = False
+
 
         return expe_config
 
@@ -63,14 +66,13 @@ def create_expe_spec(config, n_cpu, n_gpu, exp_dir):
 
     expe_config = merge_env_algo_config(config)
 
-    trial_resources = {"cpu": n_cpu, "gpu": n_gpu}
+    #trial_resources = {"cpu": expe_config["num_workers"]+3, "gpu": expe_config["num_gpus"]}
 
     experiment = Experiment(name=config["name_expe"],
                             run=config["algo"],
                             stop=config["stop"],
                             config=expe_config,
-                            trial_resources=trial_resources,
-                            num_samples=1,
+                            num_samples=config.get("num_samples",1),
                             checkpoint_freq= 2,
                             max_failures=2,
                             local_dir=exp_dir)
@@ -156,10 +158,17 @@ def prepare_pbt_config(expe_config, pbt_config):
 
         return config
 
+    # to avoid scope problem
+    def _lambda_gen(sampling_method, range):
+        return lambda : sampling_method(*range)
+
+
     pbt_config = load_single_config(os.path.join("config","pbt",pbt_config))
 
     # Change experiment name, to try few things
-    expe_config["name"] += "_pbt_test"
+    expe_config["name_expe"] += "_pbt_test"
+
+    expe_config["num_samples"] = pbt_config["num_samples"]
 
     # Override base config with random params from pbt config file
     for param_key, value in pbt_config["init_override"].items():
@@ -180,11 +189,19 @@ def prepare_pbt_config(expe_config, pbt_config):
 
             # Check type -> if int : random.randint
             if type(param_dict["range"][0]) is int :
-                pbt_parameters_mutations[param_key] = lambda: random.randint(*param_dict["range"])
+                pbt_parameters_mutations[param_key] = _lambda_gen(random.randint, param_dict["range"])
             elif type(param_dict["range"][0]) is float :
-                pbt_parameters_mutations[param_key] = lambda: random.uniform(*param_dict["range"])
+                pbt_parameters_mutations[param_key] = _lambda_gen(random.uniform, param_dict["range"])
 
-        # Configure pbt config
+            # test it works
+            try:
+                pbt_parameters_mutations[param_key]()
+            except Exception as error:
+                print("{} is ill defined, check function that generates it".format(param_key))
+                raise(error)
+
+
+    # Configure pbt config
     pbt_scheduler = pbt.PopulationBasedTraining(
         time_attr=pbt_config["time_attr"],
         reward_attr=pbt_config["reward_attr"],

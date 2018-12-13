@@ -38,7 +38,6 @@ full_config = load_config(env_config_file=args.env_config,
 register_env(full_config["env_config"]["env"], lambda env_config: vizdoom_basic_creator(env_config))
 
 
-
 full_config["callbacks"] = {"on_episode_end" : call_back_function(on_episode_end)}
 full_config["algo_config"]["monitor"] = False
 
