@@ -1,0 +1,38 @@
+{
+  "algo":"APEX",
+
+  "algo_config":
+  {
+    "num_envs_per_worker" : 1,
+    "num_workers" : 12,
+    "num_gpus": 1,
+    "gamma" : 0.95,
+
+    "lr" : 1e-4,
+    "n_step": 3,
+    "noisy" : true,
+    "num_atoms" : 20,
+
+    "collect_metrics_timeout" : 10,
+
+    "learning_starts": 5000,
+    "train_batch_size": 256,
+    "target_network_update_freq": 10000,
+    "timesteps_per_iteration": 100,
+
+    "model": {
+      "custom_model" : "base_cnn",
+      "custom_preprocessor": null,
+      "custom_options" : {
+
+        "n_layers" : 2,
+        "n_channels" : [8,16],
+        "kernel" : [[8,8],[5,5]],
+        "stride" : [4,3],
+
+        "last_layer_hidden" : 512
+
+      }
+    }
+  }
+}
