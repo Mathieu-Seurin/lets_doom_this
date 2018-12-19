@@ -8,15 +8,15 @@
     "num_gpus": 0.5,
     "gamma" : 0.95,
 
-    "lr" : 1e-4,
+    "lr" : 5e-5,
     "n_step": 3,
 
     "collect_metrics_timeout" : 10,
 
     "learning_starts": 5000,
-    "train_batch_size": 1024,
-    "target_network_update_freq": 10000,
-    "timesteps_per_iteration": 100,
+    "train_batch_size": 512,
+    "target_network_update_freq": 20000,
+    "timesteps_per_iteration": 1000,
 
     "schedule_max_timesteps": 100000,
     "exploration_fraction": 0.20,
@@ -29,10 +29,18 @@
       "custom_preprocessor": null,
       "custom_options" : {
 
+        "vision" : {
+          "n_layers" : 2,
+          "n_channels" : [8,16],
+          "kernel" : [[6,6],[3,3]] ,
+          "stride" : [2,2]
+        },
+
+
         "text_objective_config":{
-          "lstm_hidden_size" : 200,
-          "use_layer_norm" : true,
-          "embedding_size" : 6,
+          "lstm_hidden_size" : 300,
+          "use_layer_norm" : false,
+          "embedding_size" : 10,
           "vocab_size" : 19
 
         },
@@ -41,7 +49,7 @@
           "method": "concat"
         },
 
-        "last_layer_hidden" : 256
+        "last_layer_hidden" : 512
 
       }
     }
