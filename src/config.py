@@ -8,6 +8,7 @@ from ray.tune.schedulers import pbt
 from ray.rllib.agents import ppo, dqn
 import random
 
+import warnings
 
 def override_config_recurs(config, config_extension):
 
@@ -29,6 +30,15 @@ def load_single_config(config_file):
 
 def merge_env_algo_config(config):
     def _check_config_spec(expe_config):
+
+        try:
+            if expe_config["noisy"] :
+                if expe_config["exploration_final_eps"] != 0 or expe_config["schedule_max_timesteps"] > 10:
+                    warnings.warn("Using NoisyNet AND epsilon greedy, are you sure ?", stacklevel=4)
+        except IndexError:
+            #ignore maybe noisy is not useful, for ppo for exemple
+            pass
+
         # can add check to the config to avoid problem
         return expe_config
 
@@ -228,7 +238,7 @@ def select_agent(config):
 
     elif algo == "apex":
         agent = dqn.ApexAgent(config=expe_config,
-                             env=env)
+                              env=env)
     else:
         raise NotImplementedError("PPO and Apex are available, that's all")
 
