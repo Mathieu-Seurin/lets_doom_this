@@ -35,7 +35,7 @@ def merge_env_algo_config(config):
             if expe_config["noisy"] :
                 if expe_config["exploration_final_eps"] != 0 or expe_config["schedule_max_timesteps"] > 10:
                     warnings.warn("Using NoisyNet AND epsilon greedy, are you sure ?", stacklevel=4)
-        except IndexError:
+        except KeyError:
             #ignore maybe noisy is not useful, for ppo for exemple
             pass
 

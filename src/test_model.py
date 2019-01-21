@@ -25,7 +25,11 @@ parser.add_argument("-n_gpu",        type=int, default=2, help="How many gpus do
 
 
 args = parser.parse_args()
-ray.init()
+
+ray.init(object_store_memory=int(6e10),
+         num_cpus=args.n_cpu,
+         num_gpus=args.n_gpu,
+         )
 
 
 full_config = load_config(env_config_file=args.env_config,
@@ -38,7 +42,7 @@ full_config = load_config(env_config_file=args.env_config,
 register_env(full_config["env_config"]["env"], lambda env_config: vizdoom_basic_creator(env_config))
 
 
-full_config["callbacks"] = {"on_episode_end" : call_back_function(on_episode_end)}
+#full_config["callbacks"] = {"on_episode_end" : call_back_function(on_episode_end)}
 full_config["algo_config"]["monitor"] = False
 
 agent = select_agent(full_config)
@@ -47,6 +51,6 @@ for i in range(3000):
    result = agent.train()
    print(pretty_print(result))
 
-   # if i % 100 == 0:
-   #     checkpoint = agent.save()
-   #     print("checkpoint saved at", checkpoint)
+   if i % 10 == 0:
+       checkpoint = agent.save()
+       print("checkpoint saved at", checkpoint)

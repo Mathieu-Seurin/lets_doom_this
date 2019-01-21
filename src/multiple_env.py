@@ -20,7 +20,7 @@ episodes = 10
 @ray.remote
 def test_episodes(episodes):
     import gym_vizdoom
-    game = gym.make("{}-v0".format("VizdoomBasic"))
+    game = gym.make("{}-v0".format("VizdoomBasicColoredSimplest"))
 
     for i in range(episodes):
         state = game.reset()
@@ -28,7 +28,7 @@ def test_episodes(episodes):
         j = 0
         reward_total = 0
         while not done:
-            action = 3 #game.action_space.sample()
+            action = game.action_space.sample()
             observation, reward, done, info = game.step(action=action)
             j = j+1
             reward_total += reward
@@ -41,10 +41,10 @@ def test_episodes(episodes):
     return "lol"
 
 
-num_worker = 10000
+num_worker = 24
 
 ray.init(num_cpus=40)
-results = ray.get([test_episodes.remote(10) for i in range(num_worker)])
+results = ray.get([test_episodes.remote(10000) for i in range(num_worker)])
 
 #print(results)
 print(len(results))

@@ -27,7 +27,8 @@ args = parser.parse_args()
 
 
 set_seed(args.seed)
-ray.init(object_id_seed=args.seed, num_gpus=args.n_gpu, num_cpus=args.n_cpu)
+object_memory = 1e9
+ray.init(object_id_seed=args.seed, num_gpus=args.n_gpu, num_cpus=args.n_cpu, object_store_memory=object_memory)
 
 
 full_config = load_config(env_config_file=args.env_config,

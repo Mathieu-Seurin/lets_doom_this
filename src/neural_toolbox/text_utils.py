@@ -4,24 +4,29 @@ import tensorflow as tf
 
 def compute_dynamic_rnn(inputs, config, sequence_length=None):
 
-    if sequence_length != None:
-        sequence_length = tf.squeeze(sequence_length, axis=1)
 
-    # todo : bi lstm ?
-    lstm_cell = snt.LSTM(hidden_size=config["lstm_hidden_size"],
-                        use_layer_norm=config["use_layer_norm"])
+    if config["lstm_hidden_size"] > 0:
+
+        if sequence_length != None:
+            sequence_length = tf.squeeze(sequence_length, axis=1)
+
+        # todo : bi lstm ?
+        lstm_cell = snt.LSTM(hidden_size=config["lstm_hidden_size"],
+                            use_layer_norm=config["use_layer_norm"])
 
 
-    # todo : optionnal init state with vision value
-    _, last_ht_rnn = tf.nn.dynamic_rnn(lstm_cell,
-                                       inputs=inputs,
-                                       dtype=tf.float32,
-                                       time_major=False,
-                                       sequence_length=sequence_length #if available, reduce time and complexity
-                                       #  todo : add sequence length
-                                       )
+        # todo : optionnal init state with vision value
+        _, last_ht_rnn = tf.nn.dynamic_rnn(lstm_cell,
+                                           inputs=inputs,
+                                           dtype=tf.float32,
+                                           time_major=False,
+                                           sequence_length=sequence_length #if available, reduce time and complexity
+                                           )
 
-    last_ht_rnn = last_ht_rnn.hidden
+        last_ht_rnn = last_ht_rnn.hidden
+
+    else: # NO USE OF LSTM
+        last_ht_rnn = inputs
 
     return last_ht_rnn
 
@@ -39,11 +44,18 @@ def compute_embedding(objective, config):
                                  )(objective)
 
     else:  # embedding_size == 0 -> onehot vector directly to lstm
+
+        # Vocab_size or number of objective for this env if you don't use language
+        depth = config.get("vocab_size", 2)
+
         embedded_obj = tf.one_hot(indices=objective,
-                                  depth=config["vocab_size"],
+                                  depth=depth,
                                   on_value=1.0,
                                   off_value=0.0,
                                   axis=1
                                   )
+
+        if depth == 2:
+            embedded_obj = tf.squeeze(embedded_obj, axis=2)
 
     return embedded_obj

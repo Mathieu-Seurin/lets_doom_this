@@ -64,7 +64,7 @@ class EarlyMergeCNNPolicy(Model):
 
 
 
-class BaseCNNPolicyConcat(Model):
+class BaseCNNPolicyLateFuse(Model):
     def _build_layers_v2(self, input_dict, num_outputs, options):
         """Define the layers of a custom model.
 
@@ -284,4 +284,4 @@ ModelCatalog.register_custom_model("base_cnn", BaseCNNPolicy)
 ModelCatalog.register_custom_model("base_resnet", ResnetPolicy)
 
 ModelCatalog.register_custom_model("resnet_concat", ResnetPolicyConcat)
-ModelCatalog.register_custom_model("cnn_concat", BaseCNNPolicyConcat)
+ModelCatalog.register_custom_model("cnn_late", BaseCNNPolicyLateFuse)
