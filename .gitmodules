@@ -7,3 +7,6 @@
 [submodule "src/gym-vizdoom"]
 	path = src/gym-vizdoom
 	url = https://github.com/Mathieu-Seurin/gym-vizdoom.git
+[submodule "src/gym-minigrid"]
+	path = src/gym-minigrid
+	url = https://github.com/Mathieu-Seurin/gym-minigrid.git

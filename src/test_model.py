@@ -4,7 +4,7 @@ import ray
 
 from config import load_config, create_expe_spec, select_agent
 
-from env.doom_tool import vizdoom_basic_creator
+from env.env_tool import env_basic_creator
 from ray.tune import register_env
 
 from ray.tune.logger import pretty_print
@@ -39,7 +39,7 @@ full_config = load_config(env_config_file=args.env_config,
                           )
 
 
-register_env(full_config["env_config"]["env"], lambda env_config: vizdoom_basic_creator(env_config))
+register_env(full_config["env_config"]["env"], lambda env_config: env_basic_creator(env_config))
 
 
 #full_config["callbacks"] = {"on_episode_end" : call_back_function(on_episode_end)}

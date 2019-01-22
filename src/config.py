@@ -1,7 +1,7 @@
 import json
 import os
 
-from env.doom_tool import vizdoom_basic_creator
+from env.env_tool import env_basic_creator
 from ray.tune import register_env, Experiment, grid_search
 from ray.tune.schedulers import pbt
 
@@ -67,7 +67,7 @@ def create_expe_spec(config, n_cpu, n_gpu, exp_dir):
         return "{}_{}_123".format(trial.trainable_name, trial.trial_id)
 
     # Create env and register it, so ray and rllib can use it
-    register_env(config["env_config"]["env"], lambda env_config: vizdoom_basic_creator(env_config))
+    register_env(config["env_config"]["env"], lambda env_config: env_basic_creator(env_config))
 
     expe_config = merge_env_algo_config(config)
 

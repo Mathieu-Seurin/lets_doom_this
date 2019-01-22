@@ -4,7 +4,7 @@ import ray
 
 from config import load_config, create_expe_spec, select_agent
 
-from env.doom_tool import vizdoom_basic_creator
+from env.doom_tool import env_basic_creator
 from ray.tune import register_env
 
 from ray.tune.logger import pretty_print
@@ -22,7 +22,7 @@ def vizdoom_basic_creator(env_config):
     return gym.make(env_name)
 
 env = "VizdoomBasic"
-register_env("VizdoomBasic", lambda env_config: vizdoom_basic_creator(env_config))
+register_env("VizdoomBasic", lambda env_config: env_basic_creator(env_config))
 
 # env = "cartpole"
 # register_env(env, lambda env_config: gym.make("CartPole-v0"))
