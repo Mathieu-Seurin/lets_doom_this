@@ -39,6 +39,10 @@ def merge_env_algo_config(config):
             #ignore maybe noisy is not useful, for ppo for exemple
             pass
 
+        if expe_config["env_config"].get("max_size_vocab", False):
+            expe_config['model']['custom_options']['text_objective_config']['max_size_vocab'] = \
+                expe_config["env_config"]["max_size_vocab"]
+
         # can add check to the config to avoid problem
         return expe_config
 
@@ -211,7 +215,7 @@ def grid_search_overriding(base_config, json_grid_path):
 # =====================
 def set_seed(seed):
 
-    import torch
+    # import torch
     import random
     import tensorflow
     import numpy as np
@@ -219,7 +223,7 @@ def set_seed(seed):
     if seed > -1:
         print('Using seed {}'.format(seed))
         np.random.seed(seed)
-        torch.manual_seed(seed)
+        # torch.manual_seed(seed)
         random.seed(seed)
         tensorflow.set_random_seed(seed)
     else:

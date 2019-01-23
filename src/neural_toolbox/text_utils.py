@@ -38,7 +38,7 @@ def compute_embedding(objective, config):
     # if objective is rank 3 -> one-hot encoded (batch_dim, sequence, vocab_size)
     # else objective is rank 2 -> need to compute embedding (batch_dim, sequence_of_embedding)
     if config["embedding_size"] > 0:
-        embedded_obj = snt.Embed(vocab_size=config["vocab_size"],  # todo : super ugly, but cannot avoid it.
+        embedded_obj = snt.Embed(vocab_size=config["max_size_vocab"]+1,
                                  embed_dim=config["embedding_size"],
                                  densify_gradients=True,
                                  )(objective)

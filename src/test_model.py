@@ -51,6 +51,6 @@ for i in range(3000):
    result = agent.train()
    print(pretty_print(result))
 
-   if i % 10 == 0:
+   if i % 10 == 9:
        checkpoint = agent.save()
        print("checkpoint saved at", checkpoint)

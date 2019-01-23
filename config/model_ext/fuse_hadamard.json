@@ -1,0 +1,14 @@
+{
+  "algo":"APEX",
+
+  "algo_config": {
+    "model": {
+      "custom_model": "cnn_late",
+      "custom_options": {
+        "fusing": {
+          "method": "hadamard"
+        }
+      }
+    }
+  }
+}
