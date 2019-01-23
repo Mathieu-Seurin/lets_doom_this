@@ -5,7 +5,6 @@ from ray.rllib.models import ModelCatalog, Model
 import tensorflow as tf
 import sonnet as snt
 
-
 from neural_toolbox.film_utils import get_init_conv, get_init_mlp, ResBlock
 from neural_toolbox.text_utils import compute_dynamic_rnn, compute_embedding
 from neural_toolbox.fuse_utils import fuse_modality
@@ -109,11 +108,26 @@ class EarlyMergeCNNPolicy(Model):
                                           sequence_length=input_dict['obs']['sentence_length'])
 
 
+        reducing_rnn_state = config["fusing"]["reduce_text_before_fuse"]
+        if reducing_rnn_state:
+            last_ht_rnn = snt.Linear(reducing_rnn_state)
+
+
+        # Duplicate rnn state to append it to the image as in "The impact of early fusion and VQA in details"
+        last_ht_rnn = tf.expand_dims(tf.expand_dims(last_ht_rnn, axis=1), axis=2)
+
+        tiled_last_ht = tf.tile(last_ht_rnn, multiples=[1,7,7,1]) # todo : don't hardcode 7x7
+
         # Features Extractor
         # ==================
         to_next_conv = state
         vision_config = config["vision"]
         for layer in range(vision_config["n_layers"]):
+
+            # Early text fusing, in the conv pipeline
+            if layer == config["fusing"]["layer_to_fuse"]-1:
+                to_next_conv = tf.concat((to_next_conv, tiled_last_ht), axis=3)
+
             conv_layer = snt.Conv2D(output_channels= vision_config["n_channels"][layer],
                                                  kernel_shape=vision_config["kernel"][layer],
                                                  stride=vision_config["stride"][layer],
@@ -123,14 +137,8 @@ class EarlyMergeCNNPolicy(Model):
 
         flatten_vision = snt.BatchFlatten(preserve_dims=1)(to_next_conv)
 
-
-        # Fusing both modalities
-        # ======================
-        fusing_resblock_lstm = fuse_modality(vision_vectorized=flatten_vision, text_embedded=last_ht_rnn,
-                                             config=config["fusing"])
-
         # MLP layers -> Q function or policy
-        out_mlp1 = tf.nn.relu(snt.Linear(config["last_layer_hidden"],initializers=initializers_mlp)(fusing_resblock_lstm))
+        out_mlp1 = tf.nn.relu(snt.Linear(config["last_layer_hidden"],initializers=initializers_mlp)(flatten_vision))
         out_mlp2 = snt.Linear(num_outputs,initializers=initializers_mlp)(out_mlp1)
 
         return out_mlp2, out_mlp1 # you need to return output (out_mlp2) and input of the last layer (out_mlp1)

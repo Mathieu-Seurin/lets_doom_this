@@ -41,7 +41,9 @@
         },
 
         "fusing" : {
-          "method": "concat"
+          "method": "concat",
+          "layer_to_fuse" : -1,
+          "reduce_text_before_fuse" : 0
         },
 
         "vision" : {
