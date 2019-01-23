@@ -10,8 +10,8 @@
       "custom_options" : {
 
         "fusing" : {
-          "layer_to_fuse" : 2,
-          "reduce_text_before_fuse" : 16
+          "layer_to_fuse" : 3,
+          "reduce_text_before_fuse" : 64
         }
       }
 

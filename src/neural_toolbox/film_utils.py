@@ -50,11 +50,12 @@ class FilmLayer(snt.AbstractModule):
 
 
 class ResBlock(snt.AbstractModule):
-    def __init__(self, options):
+    def __init__(self, conv_channel, kernel):
         super(ResBlock, self).__init__(name="resblock")
 
         self.initializers_conv = get_init_conv()
-        self.conv_channel = options["conv_channel"]
+        self.conv_channel = conv_channel
+        self.kernel = kernel
 
     def _build(self, inputs):
 
@@ -62,12 +63,12 @@ class ResBlock(snt.AbstractModule):
 
         # First conv + relu
         after_relu1 = tf.nn.relu(snt.Conv2D(output_channels=self.conv_channel,
-                                            kernel_shape=[3, 3], stride=1, padding=snt.SAME,
+                                            kernel_shape=self.kernel, stride=1, padding=snt.SAME,
                                             initializers=self.initializers_conv)(state))
 
         # Second conv + bn ?(not learned) + relu
         after_conv2 = snt.Conv2D(output_channels=self.conv_channel,
-                                 kernel_shape=[3, 3], stride=1, padding=snt.SAME,
+                                 kernel_shape=self.kernel, stride=1, padding=snt.SAME,
                                  initializers=self.initializers_conv)(after_relu1)
 
         # todo : check batchnorm, but can destroy performance in RL.

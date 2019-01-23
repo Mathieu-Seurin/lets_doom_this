@@ -16,11 +16,9 @@ from neural_toolbox.fuse_utils import fuse_modality
 class FilmedResnetPolicyConcat(Model):
     def _build_layers_v2(self, input_dict, num_outputs, options):
 
-        raise NotImplementedError("Not yet niggah")
-
         config = options["custom_options"]
 
-        n_resblock = config["n_resblock"]
+        n_resblock = config["vision"]["resblock_config"]["n_resblock"]
         initializers_mlp = get_init_mlp()
         initializers_conv = get_init_conv()
 
@@ -30,7 +28,7 @@ class FilmedResnetPolicyConcat(Model):
 
         # Stem
         feat_stem = state
-        stem_config = config["stem_config"]
+        stem_config = config["vision"]["stem_config"]
 
         for layer in range(stem_config["n_layer"]):
             feat_stem = snt.Conv2D(output_channels=stem_config["channel"][layer],
@@ -40,10 +38,12 @@ class FilmedResnetPolicyConcat(Model):
                                    padding=snt.VALID,
                                    initializers=initializers_conv)(feat_stem)
 
-        next_block = feat_stem
+        # Resblock and modulation
+        config["vision"][""]
 
+        next_block = feat_stem
         for block in range(n_resblock):
-            next_block = ResBlock(config["resblock_config"])(next_block)
+            next_block = ResBlock(conv_channel=)(next_block)
 
         final_conv = snt.Conv2D(output_channels=16,
                                 kernel_shape=1,
@@ -110,7 +110,7 @@ class EarlyMergeCNNPolicy(Model):
 
         reducing_rnn_state = config["fusing"]["reduce_text_before_fuse"]
         if reducing_rnn_state:
-            last_ht_rnn = snt.Linear(reducing_rnn_state)
+            last_ht_rnn = snt.Linear(reducing_rnn_state)(last_ht_rnn)
 
 
         # Duplicate rnn state to append it to the image as in "The impact of early fusion and VQA in details"
