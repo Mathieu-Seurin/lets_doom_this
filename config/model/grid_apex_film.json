@@ -17,9 +17,9 @@
 
     "buffer_size" : 500000,
     "learning_starts": 10000,
-    "sample_batch_size" : 20,
-    "train_batch_size": 512,
-    "target_network_update_freq": 5000,
+    "sample_batch_size" : 200,
+    "train_batch_size": 1024,
+    "target_network_update_freq": 10000,
     "timesteps_per_iteration": 2000,
 
     "per_worker_exploration" : false,

@@ -13,7 +13,7 @@ from neural_toolbox.fuse_utils import fuse_modality
 #        MULTI-MODAL POLICY
 #####################################
 
-class FilmedResnetPolicyConcat(Model):
+class FilmedResnetPolicy(Model):
     def _build_layers_v2(self, input_dict, num_outputs, options):
 
         config = options["custom_options"]
@@ -39,11 +39,12 @@ class FilmedResnetPolicyConcat(Model):
                                    initializers=initializers_conv)(feat_stem)
 
         # Resblock and modulation
-        config["vision"][""]
+        resconfig = config["vision"]["resblock_config"]
 
         next_block = feat_stem
         for block in range(n_resblock):
-            next_block = ResBlock(conv_channel=)(next_block)
+            next_block = ResBlock(conv_channel=resconfig["conv_channel"][block],
+                                  kernel=resconfig["kernel"])(next_block)
 
         final_conv = snt.Conv2D(output_channels=16,
                                 kernel_shape=1,
@@ -297,3 +298,5 @@ ModelCatalog.register_custom_model("base_resnet", ResnetPolicy)
 #ModelCatalog.register_custom_model("resnet_concat", ResnetPolicyConcat)
 ModelCatalog.register_custom_model("cnn_early", EarlyMergeCNNPolicy)
 ModelCatalog.register_custom_model("cnn_late", BaseCNNPolicyLateFuse)
+
+ModelCatalog.register_custom_model("cnn_late", FilmedResnetPolicy)
