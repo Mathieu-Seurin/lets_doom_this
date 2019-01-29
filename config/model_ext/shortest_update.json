@@ -1,0 +1,24 @@
+{
+  "algo":"APEX",
+
+  "algo_config":
+  {
+    "num_envs_per_worker" : 6,
+    "num_workers" : 24,
+    "num_gpus": 1,
+    "gamma" : 0.95,
+
+    "lr" : 1e-5,
+    "n_step": 1,
+    "noisy" : false,
+    "num_atoms" : 1,
+
+    "collect_metrics_timeout" : 10,
+
+    "buffer_size" : 500000,
+    "learning_starts": 10000,
+    "sample_batch_size" : 200,
+    "train_batch_size": 2048,
+    "target_network_update_freq": 2500
+  }
+}

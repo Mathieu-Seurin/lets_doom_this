@@ -82,34 +82,38 @@ class ResBlock(snt.AbstractModule):
 
 
 class FilmedResblock(snt.AbstractModule):
-    def __init__(self, film_layer, conv_layer):
-        raise NotImplementedError("Still under test")
+    def __init__(self, film_layer, n_conv_channel, kernel, stride):
         super(FilmedResblock, self).__init__(name="mod_resblock")
 
         self.initializers_conv = get_init_conv()
         self.film_layer = film_layer
-        self.conv1_channel = conv_layer
-        self.conv2_channel = conv_layer
 
-    def _build(self, inputs, is_training):
+        self.conv1_channel = n_conv_channel
+        self.conv2_channel = n_conv_channel
+
+        self.kernel = kernel
+        self.stride = stride
+
+    def _build(self, inputs):
 
         state = inputs["state"]
         context = inputs["objective"]
 
         # First conv + relu
         after_relu1 = tf.nn.relu(snt.Conv2D(output_channels=self.conv1_channel,
-                                            kernel_shape=[3,3], stride=2, padding=snt.SAME,
+                                            kernel_shape=self.kernel, stride=self.stride, padding=snt.SAME,
                                             initializers=self.initializers_conv)(state))
 
-        # Second conv + bn (not learned) + relu
+        # Second conv + (bn (not learned)) + relu
         after_conv2 = snt.Conv2D(output_channels=self.conv2_channel,
-                                 kernel_shape=[3,3], stride=2, padding=snt.SAME,
+                                 kernel_shape=self.kernel, stride=self.stride, padding=snt.SAME,
                                  initializers=self.initializers_conv)(after_relu1)
 
-        after_bn1 = snt.BatchNorm(scale=False, offset=False)(after_conv2, is_training) # No learned parameters
-        after_film = self.film_layer({"state" : after_bn1, "objective": context})
+        # bn might be bad for rl
+        #after_bn1 = snt.BatchNorm(scale=False, offset=False)(after_conv2, is_training) # No learned parameters
 
-        after_relu2 = tf.nn.relu(after_bn1)
+        after_film = self.film_layer({"state" : after_conv2, "objective": context})
+        after_relu2 = tf.nn.relu(after_film)
 
         # Adding skip connection
         result = after_relu1 + after_relu2

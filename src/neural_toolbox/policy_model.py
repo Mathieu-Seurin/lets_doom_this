@@ -5,7 +5,7 @@ from ray.rllib.models import ModelCatalog, Model
 import tensorflow as tf
 import sonnet as snt
 
-from neural_toolbox.film_utils import get_init_conv, get_init_mlp, ResBlock
+from neural_toolbox.film_utils import get_init_conv, get_init_mlp, ResBlock, FilmedResblock, FilmLayer
 from neural_toolbox.text_utils import compute_dynamic_rnn, compute_embedding
 from neural_toolbox.fuse_utils import fuse_modality
 
@@ -22,44 +22,6 @@ class FilmedResnetPolicy(Model):
         initializers_mlp = get_init_mlp()
         initializers_conv = get_init_conv()
 
-        # Image part
-        #============
-        state = input_dict["obs"]["image"]
-
-        # Stem
-        feat_stem = state
-        stem_config = config["vision"]["stem_config"]
-
-        for layer in range(stem_config["n_layer"]):
-            feat_stem = snt.Conv2D(output_channels=stem_config["channel"][layer],
-                                   # the number of channel is marked as list, index=channel at this layer
-                                   kernel_shape=stem_config["kernel_size"][layer],
-                                   stride=stem_config["stride"][layer],
-                                   padding=snt.VALID,
-                                   initializers=initializers_conv)(feat_stem)
-
-        # Resblock and modulation
-        resconfig = config["vision"]["resblock_config"]
-
-        next_block = feat_stem
-        for block in range(n_resblock):
-            next_block = ResBlock(conv_channel=resconfig["conv_channel"][block],
-                                  kernel=resconfig["kernel"])(next_block)
-
-        final_conv = snt.Conv2D(output_channels=16,
-                                kernel_shape=1,
-                                stride=1,
-                                padding=snt.SAME,
-                                initializers=initializers_conv)(next_block)
-
-        # final_pool = tf.nn.max_pool(final_conv,
-        #                             ksize=[1,4,4,1],
-        #                             strides=[1,2,2,1],
-        #                             padding=snt.SAME
-        #                             )
-
-        flatten_resblock = snt.BatchFlatten(preserve_dims=1)(final_conv)
-
         # Objective pipeline
         # ==================
         objective = input_dict["obs"]["mission"]
@@ -71,20 +33,49 @@ class FilmedResnetPolicy(Model):
         # (+bi) lstm ( + layer_norm), specified in config
         last_ht_rnn = compute_dynamic_rnn(inputs=embedded_obj, config=config["text_objective_config"])
 
+        # Image part
+        #============
+        state = input_dict["obs"]["image"]
 
-        # Fusing both modalities
-        # ======================
-        fusing_resblock_lstm = fuse_modality(vision_vectorized=flatten_resblock, text_embedded=last_ht_rnn,
-                                             config=config["fusing"])
+        # Stem
+        feat_stem = state
+        stem_config = config["vision"]["stem_config"]
+
+        for layer in range(stem_config["n_layers"]):
+            feat_stem = snt.Conv2D(output_channels=stem_config["n_channels"][layer],
+                                   # the number of channel is marked as list, index=channel at this layer
+                                   kernel_shape=stem_config["kernel"][layer],
+                                   stride=stem_config["stride"][layer],
+                                   padding=snt.VALID,
+                                   initializers=initializers_conv)(feat_stem)
+
+        # Resblock and modulation
+        resconfig = config["vision"]["resblock_config"]
+
+        next_block = feat_stem
+        for block in range(n_resblock):
+            film_layer = FilmLayer()
+            next_block = FilmedResblock(film_layer=film_layer,
+                                        n_conv_channel=resconfig["n_channels"][block],
+                                        kernel=resconfig["kernel"][block],
+                                        stride=resconfig["stride"][block])({"state" : next_block,
+                                                                            "objective" : last_ht_rnn})
+
+        head_config = config["vision"]["head_config"]
+        head_conv = snt.Conv2D(output_channels=head_config["n_channels"],
+                                kernel_shape=head_config["kernel"],
+                                stride=head_config["stride"],
+                                padding=snt.SAME,
+                                initializers=initializers_conv)(next_block)
+
+        flatten_resblock = snt.BatchFlatten(preserve_dims=1)(head_conv)
 
         # Classifier
         # ===========
-        out_mlp1 = tf.nn.relu(snt.Linear(config["last_layer_hidden"], initializers=initializers_mlp)(fusing_resblock_lstm))
+        out_mlp1 = tf.nn.relu(snt.Linear(config["last_layer_hidden"], initializers=initializers_mlp)(flatten_resblock))
         out_mlp2 = snt.Linear(num_outputs, initializers=initializers_mlp)(out_mlp1)
 
         return out_mlp2, out_mlp1
-
-
 
 
 class EarlyMergeCNNPolicy(Model):
@@ -137,6 +128,11 @@ class EarlyMergeCNNPolicy(Model):
             to_next_conv = tf.nn.relu(conv_layer)
 
         flatten_vision = snt.BatchFlatten(preserve_dims=1)(to_next_conv)
+
+        # If necessary add direction of character
+        if input_dict['obs'].get('direction', False) is not False:
+            direction_one_hot = input_dict['obs']['direction']
+            flatten_vision = tf.concat((flatten_vision, direction_one_hot), axis=1)
 
         # MLP layers -> Q function or policy
         out_mlp1 = tf.nn.relu(snt.Linear(config["last_layer_hidden"],initializers=initializers_mlp)(flatten_vision))
@@ -198,6 +194,11 @@ class BaseCNNPolicyLateFuse(Model):
         # ======================
         fusing_resblock_lstm = fuse_modality(vision_vectorized=flatten_vision, text_embedded=last_ht_rnn,
                                              config=config["fusing"])
+
+        # If necessary add direction of character
+        if input_dict['obs'].get('direction', False) is not False:
+            direction_one_hot = input_dict['obs']['direction']
+            fusing_resblock_lstm = tf.concat((fusing_resblock_lstm, direction_one_hot), axis=1)
 
         # MLP layers -> Q function or policy
         out_mlp1 = tf.nn.relu(snt.Linear(config["last_layer_hidden"],initializers=initializers_mlp)(fusing_resblock_lstm))
@@ -299,4 +300,4 @@ ModelCatalog.register_custom_model("base_resnet", ResnetPolicy)
 ModelCatalog.register_custom_model("cnn_early", EarlyMergeCNNPolicy)
 ModelCatalog.register_custom_model("cnn_late", BaseCNNPolicyLateFuse)
 
-ModelCatalog.register_custom_model("cnn_late", FilmedResnetPolicy)
+ModelCatalog.register_custom_model("resnet_film", FilmedResnetPolicy)

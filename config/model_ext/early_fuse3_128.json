@@ -1,0 +1,21 @@
+{
+  "algo":"APEX",
+
+  "algo_config":
+  {
+
+    "model": {
+      "custom_model": "cnn_early",
+      "custom_preprocessor": null,
+      "custom_options" : {
+
+        "fusing" : {
+          "layer_to_fuse" : 3,
+          "reduce_text_before_fuse" : 128
+        }
+      }
+
+
+    }
+  }
+}

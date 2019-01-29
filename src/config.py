@@ -8,6 +8,8 @@ from ray.tune.schedulers import pbt
 from ray.rllib.agents import ppo, dqn
 import random
 
+from neural_toolbox.algo_graph import FilmFrozenApex, VisionFrozenApex
+
 import warnings
 
 def override_config_recurs(config, config_extension):
@@ -243,6 +245,12 @@ def select_agent(config):
     elif algo == "apex":
         agent = dqn.ApexAgent(config=expe_config,
                               env=env)
+    elif algo == "apex_film_frozen":
+        agent = FilmFrozenApex(config=expe_config,
+                               env=env)
+    elif algo == "apex_film_frozen":
+        agent = VisionFrozenApex(config=expe_config,
+                                 env=env)
     else:
         raise NotImplementedError("PPO and Apex are available, that's all")
 

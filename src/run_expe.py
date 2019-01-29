@@ -5,9 +5,13 @@ warnings.simplefilter("ignore")
 import argparse
 
 import ray
+from ray import tune
+
 
 from config import load_config, create_expe_spec, set_seed, prepare_pbt_config, grid_search_overriding
+
 from neural_toolbox import policy_model
+from neural_toolbox import algo_graph
 
 parser = argparse.ArgumentParser('Log Parser arguments!')
 
@@ -22,12 +26,12 @@ parser.add_argument("-seed",         type=int, default=0, help="Random seed used
 parser.add_argument("-n_cpu",        type=int, default=24, help="How many cpus do you want ?")
 parser.add_argument("-n_gpu",        type=int, default=2, help="How many gpus do you want ? Because we own too many")
 
-
 args = parser.parse_args()
 
-
 set_seed(args.seed)
-ray.init(object_id_seed=args.seed, num_gpus=args.n_gpu, num_cpus=args.n_cpu)
+ray.init(object_id_seed=args.seed,
+         num_gpus=args.n_gpu,
+         num_cpus=args.n_cpu)
 
 full_config = load_config(env_config_file=args.env_config,
                           model_config_file=args.model_config,
@@ -49,6 +53,6 @@ experiment = create_expe_spec(full_config,
                               exp_dir=args.exp_dir)
 
 
-ray.tune.run_experiments(experiments=experiment,
-                         scheduler=pbt_scheduler,
-                         queue_trials=True)
+tune.run_experiments(experiments=experiment,
+                     scheduler=pbt_scheduler,
+                     queue_trials=True)
