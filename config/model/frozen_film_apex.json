@@ -1,0 +1,73 @@
+{
+  "algo":"apex_film_frozen",
+
+  "algo_config":
+  {
+    "num_envs_per_worker" : 6,
+    "num_workers" : 24,
+    "num_gpus": 1,
+    "gamma" : 0.95,
+
+    "lr" : 5e-4,
+    "n_step": 1,
+    "noisy" : false,
+    "num_atoms" : 1,
+
+    "collect_metrics_timeout" : 10,
+
+    "buffer_size" : 200000,
+    "learning_starts": 100,
+    "sample_batch_size" : 200,
+    "train_batch_size": 2048,
+    "target_network_update_freq": 5000,
+    "timesteps_per_iteration": 500,
+
+    "per_worker_exploration" : false,
+
+    "exploration_fraction": 0.5,
+    "schedule_max_timesteps" : 1000000,
+    "exploration_final_eps" : 0.02,
+
+    "model": {
+      "custom_model": "resnet_film",
+      "custom_preprocessor": null,
+      "custom_options" : {
+
+        "text_objective_config":
+        {
+          "lstm_hidden_size" : 0,
+          "embedding_size" : 0,
+          "use_layer_norm" : false
+        },
+
+        "vision" : {
+
+          "stem_config" :{
+            "n_layers" : 2,
+            "n_channels" : [32,64],
+            "kernel" : [[2,2],[2,2]],
+            "stride" : [1,1]
+          },
+
+          "resblock_config" : {
+            "n_resblock" : 2,
+            "n_channels" : [64,64],
+            "kernel" : [[2,2],[2,2]],
+            "stride" : [1,1]
+          },
+
+          "head_config" : {
+            "n_channels" : 32,
+            "kernel" : [1,1],
+            "stride" : 1
+
+          }
+
+        },
+
+        "last_layer_hidden" : 64}
+
+
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "algo":"apex_film_frozen_loaded_weight",
+
+  "algo_config":
+  {
+
+    "lr" : 5e-4,
+
+    "buffer_size" : 200000,
+    "learning_starts": 100,
+    "sample_batch_size" : 200,
+    "train_batch_size": 2048,
+    "target_network_update_freq": 5000,
+    "timesteps_per_iteration": 500,
+
+    "exploration_fraction": 0.2,
+    "schedule_max_timesteps" : 10000000,
+    "exploration_final_eps" : 0.02
+
+    }
+}

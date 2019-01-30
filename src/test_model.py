@@ -14,7 +14,7 @@ from env.callback import on_episode_end
 from neural_toolbox import policy_model
 from neural_toolbox import algo_graph
 
-
+import numpy as np
 
 parser = argparse.ArgumentParser('Log Parser arguments!')
 
@@ -26,13 +26,12 @@ parser.add_argument("-exp_dir",       type=str, default="out", help="Directory a
 parser.add_argument("-seed",          type=int, default=0, help="Random seed used")
 parser.add_argument("-n_cpu",         type=int, default=24, help="How many cpus do you want ?")
 parser.add_argument("-n_gpu",         type=int, default=1, help="How many cpus do you want ?")
-#parser.add_argument("-continue_train",type=int, default=2, help="How many gpus do you want ? Because we own too many")
 
 args = parser.parse_args()
 
 ray.init(num_cpus=args.n_cpu,
          num_gpus=args.n_gpu,
-         local_mode=ray.PYTHON_MODE
+         #local_mode=ray.PYTHON_MODE
          )
 
 
@@ -51,12 +50,19 @@ full_config["algo_config"]["monitor"] = False
 
 agent = select_agent(full_config)
 
-#if args.config_extension
+#agent.set_weights(agent.get_weights())
+#agent.set_weights({'default' : np.load('test_weight.npy')})
 
-for i in range(20):
-   result = agent.train()
-   print(pretty_print(result))
+max_reward = 0
 
-   if i % 10 == 0:
-       checkpoint = agent.save()
-       print("checkpoint saved at", checkpoint)
+for i in range(30):
+    result = agent.train()
+    print(pretty_print(result))
+
+    # if result['episode_reward_mean'] > max_reward:
+    #     np.save('test_weight.npy',agent.get_weights()['default'])
+    #     max_reward = result['episode_reward_mean']
+
+    # if i % 10 == 0:
+    #     checkpoint = agent.save()
+    #     print("checkpoint saved at", checkpoint)

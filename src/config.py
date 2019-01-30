@@ -8,7 +8,7 @@ from ray.tune.schedulers import pbt
 from ray.rllib.agents import ppo, dqn
 import random
 
-from neural_toolbox.algo_graph import FilmFrozenApex, VisionFrozenApex
+from neural_toolbox.algo_graph import FilmFrozenApex, VisionFrozenApex, FilmFrozenApexLoadedWeight, VisionFrozenApexLoadedWeight
 
 import warnings
 
@@ -241,16 +241,21 @@ def select_agent(config):
     if algo == "ppo":
         agent = ppo.PPOAgent(config=expe_config,
                              env=env)
-
     elif algo == "apex":
         agent = dqn.ApexAgent(config=expe_config,
                               env=env)
     elif algo == "apex_film_frozen":
         agent = FilmFrozenApex(config=expe_config,
                                env=env)
-    elif algo == "apex_film_frozen":
+    elif algo == "apex_vision_frozen":
         agent = VisionFrozenApex(config=expe_config,
                                  env=env)
+    elif algo == "apex_film_frozen_loaded_weight":
+        agent = FilmFrozenApexLoadedWeight(config=expe_config,
+                                           env=env)
+    elif algo == "apex_vision_frozen_loaded_weight":
+        agent = VisionFrozenApexLoadedWeight(config=expe_config,
+                                             env=env)
     else:
         raise NotImplementedError("PPO and Apex are available, that's all")
 

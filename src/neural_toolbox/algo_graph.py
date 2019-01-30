@@ -4,6 +4,21 @@ from ray.tune.registry import register_trainable
 
 from copy import copy
 
+import numpy as np
+import os
+from pathlib import Path
+
+def loading_class_factory(class_to_override, path_to_weights):
+
+    class LoadedPolicyGraph(class_to_override):
+        def __init__(self, *args, **kwargs):
+            self.path_to_model = path_to_weights
+            super(LoadedPolicyGraph, self).__init__(*args, **kwargs)
+
+            loaded_weight = np.load(os.path.join(Path.home(),'lets_doom_this',path_to_weights))
+            self.set_weights(loaded_weight)
+
+    return LoadedPolicyGraph
 
 def filter_var_policy_factory(scope_to_freeze=None, scope_not_to_freeze=None):
     """
@@ -60,6 +75,23 @@ class VisionFrozenApex(dqn.ApexAgent):
 
     _policy_graph = filter_var_policy_factory(scope_not_to_freeze='film')
 
+class VisionFrozenApexLoadedWeight(dqn.ApexAgent):
+    _agent_name = "APEX_VISION_FROZEN_LOADED_WEIGHT"
+    _default_config = dqn.apex.APEX_DEFAULT_CONFIG
 
-register_trainable("APEX_VISION_FROZEN", VisionFrozenApex)
-register_trainable("APEX_FILM_FROZEN", FilmFrozenApex)
+    _policy_graph = loading_class_factory(filter_var_policy_factory(scope_not_to_freeze='film'), 'test_weight.npy')
+
+class FilmFrozenApexLoadedWeight(dqn.ApexAgent):
+    _agent_name = "APEX_FILM_FROZEN_LOADED_WEIGHT"
+    _default_config = dqn.apex.APEX_DEFAULT_CONFIG
+
+    _policy_graph = loading_class_factory(filter_var_policy_factory(scope_to_freeze='film'), 'test_weight.npy')
+
+
+# Frozen GraphModel
+register_trainable("apex_vision_frozen", VisionFrozenApex)
+register_trainable("apex_film_frozen", FilmFrozenApex)
+
+# Model loading
+register_trainable("apex_vision_frozen_loaded_weight", VisionFrozenApexLoadedWeight)
+register_trainable("apex_film_frozen_loaded_weight", FilmFrozenApexLoadedWeight)
